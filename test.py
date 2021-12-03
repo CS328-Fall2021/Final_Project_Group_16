@@ -28,6 +28,7 @@ while True:
 print(temp.shape[1])
 
 temp = temp.reshape(temp.shape[0],-1)
+temp = temp.reshape(temp.shape[0],-1)
 np.savetxt('data/test.csv', temp)
 load_temp = np.loadtxt('data/test.csv')
 
