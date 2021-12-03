@@ -3,7 +3,7 @@ import numpy as np
 import dlib,os
 
 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(0, cv.CAP_DSHOW)
 
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("content/shape_predictor_68_face_landmarks.dat")
@@ -34,6 +34,11 @@ while True:
         #cv.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
 
         landmarks = predictor(gray, face)
+        face_points = []
+        for point in landmarks.parts():
+            face_points.append([point.x, point.y])
+        raveled = np.asarray(face_points)
+        print(raveled)
         frame = draw_eye(landmarks, frame, eye_points[0])
         frame = draw_eye(landmarks, frame, eye_points[1])
 

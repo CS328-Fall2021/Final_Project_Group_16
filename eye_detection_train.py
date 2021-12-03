@@ -8,26 +8,15 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
 import pickle
 import math
-
-class NoLabelDetectedIntheFrame(Exception):
-    pass
+from utils import data_dir, output_dir, class_labels, WINDOW_SIZE, detector, predictor, NoLabelDetectedIntheFrame
 
 
-WINDOW_SIZE = 20 # how many frames in each window
 
-# data should be named as eye-data-Chang-0.csv 
-data_dir = 'data' # directory where the data files are stored
-
-output_dir = 'training_output' # directory where the classifier(s) are stored
-
-class_labels = ['blinking', 'eye open', 'frown']
-# class_labels = ['blinking', 'eye open', 'frown']
-# labels_index = [    0     ,      1    ,    2   ]
+# csv should be named as eye-data-Chang-0.csv 
 
 class_names = []
 
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
+
 
 data = []
 
@@ -84,7 +73,8 @@ for i, window_frames_with_label in enumerate(data):
         frames_three_dimention_data.append(unraveled)
 	
     if label is None: raise NoLabelDetectedIntheFrame
-
+    # print(frames_three_dimention_data[0])
+    
     # window would be WINDOW_SIZE*68*2 for x,y coordinate for 68 points for WINDOW_SIZE numbers of frames
     x = feature_extractor.extract_features(frames_three_dimention_data)
     if (len(x) != X.shape[1]):
