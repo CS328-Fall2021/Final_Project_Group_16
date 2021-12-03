@@ -1,6 +1,6 @@
 import cv2 as cv
 import numpy as np
-import dlib
+import dlib,os
 
 
 cap = cv.VideoCapture(0)
