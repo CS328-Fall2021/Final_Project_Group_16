@@ -25,6 +25,7 @@ def ActivityDetected(frame, activity):
     cv.putText(frame, class_labels[activity], (50,150), FONT, 3, (255,0,0))
     print("Current activity: {}.".format(class_labels[activity]))
     sys.stdout.flush()
+    return frame
 
 def predict(last_frame, window):
     
@@ -32,8 +33,7 @@ def predict(last_frame, window):
     X = np.reshape(X,(1,-1))
     
     index = classifier.predict(X)    
-    ActivityDetected(last_frame, index)    
-    return
+    return ActivityDetected(last_frame, index) 
 
 
 def midpoint(p1 ,p2):
@@ -49,6 +49,7 @@ def draw_eye(landmarks, frame, points):
     hor_line = cv.line(frame, left_point, right_point, (0, 255, 0), 2)
     ver_line = cv.line(frame, center_top, center_bottom, (0, 255, 0), 2)
     return frame
+
 try:
     cur_samples = []
     while True:
@@ -68,13 +69,15 @@ try:
                 face_points.append([point.x, point.y])
             raveled = np.asarray(face_points)
             cur_samples.append(raveled)
-            if len(cur_samples) >= WINDOW_SIZE:
-                predict(frame,cur_samples)
-                cur_samples.clear()
+            
             frame = draw_eye(landmarks, frame, eye_points[0])
             frame = draw_eye(landmarks, frame, eye_points[1])
 
-        cv.imshow("Frame", frame)
+            if len(cur_samples) >= WINDOW_SIZE:
+                predict(frame,cur_samples)
+                cur_samples.clear()
+
+        cv.imshow("Eye Movement Classification", frame)
 
         if cv.waitKey(1) == ord('q'): raise KeyboardInterrupt
             
