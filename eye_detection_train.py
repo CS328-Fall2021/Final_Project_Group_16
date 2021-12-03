@@ -13,17 +13,19 @@ data_dir = 'data' # directory where the data files are stored
 
 output_dir = 'training_output' # directory where the classifier(s) are stored
 
-class_labels = ['blinking', 'eye open', 'eye close', 'frown']
+class_labels = ['blinking', 'eye open', 'frown']
+# class_labels = ['blinking', 'eye open', 'frown']
+# labels_index = [    0     ,      1    ,    2   ]
 
 if not os.path.exists(output_dir):
-	os.mkdir(output_dir)
+    os.mkdir(output_dir)
 
 for filename in os.listdir(data_dir):
-	if filename.endswith(".csv") and filename.startswith("eye-data"):
-		filename_components = filename.split("-")
-        tester = filename_components[2]
-        print("Loading data for {}.".format(tester))
-        speaker_label = class_labels.index(speaker)
+    if filename.endswith(".csv") and filename.startswith("eye-data"):
+        filename_components = filename.split("-")
+        label_index = int(filename_components[2])
+        eye_label = class_labels[label_index]
+        print("Loading data for {}.".format(eye_label))
         sys.stdout.flush()
         data_file = os.path.join(data_dir, filename)
-        data_for_current_speaker = np.genfromtxt(data_file, delimiter=',')
+        data_for_current_label = np.genfromtxt(data_file, delimiter=',')
