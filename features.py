@@ -16,23 +16,25 @@ class FeatureExtractor():
     def _getEyePoints(self, gray, face):
         return self.predictor(gray, face)
 
-    def _getVerticalLine(self,landmarks):
+    def _getVerticalLineRatio(self,landmarks):
         pass
-    
-    def _getHorizontalLine(self,landmarks):
-        pass
-    
-    def _getLineRatio(self,landmarks):
+    def _getEyelength(self,window,landmarks): # use histrgam to get most common interval and base on the range of it to determine the eye length when open
         pass
 
+    def _getHorizontalLineRatio(self,window,landmarks):  #input 1 d array output 1d
+
+        pass
+    
+    def _getLineRatio(self,landmarks): # x y ratio v/h
+        pass
     # frame is np array with (480,640,3) shape
     def extract_features(self, frame, debug=True):
-        X = []
+        x = []
         y = []
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         faces = self.detector(gray)
         for face in faces:
             landmarks = self._getEyePoints(gray, face)
-            X.append(landmarks)
+            x.append(landmarks)
             y.append('EyePoints')
-        return X,y
+        return x,y
