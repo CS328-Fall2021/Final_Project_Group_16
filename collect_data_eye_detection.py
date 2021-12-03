@@ -1,25 +1,24 @@
 import os
 import cv2 as cv
 import numpy as np
-import imutils
+import imutils, dlib
 
 
-# class_labels = ['blinking', 'eye open', 'frown']
+# class_labels = ['eye open', 'blinking', 'frown']
 # labels_index = [    0     ,      1    ,    2   ]
 
 label = 0
 
-filename="eye-data-Kai.csv"#"eye-data-HenryVIII-1.csv"
+filename="eye-data-{}.csv".format(label)#"eye-data-1.csv"
 
 data_dir = "data"
 
 if not os.path.exists(data_dir):
     os.mkdir(data_dir)
 
+cap = cv.VideoCapture(0, cv.CAP_DSHOW)
 
-cap = cv.VideoCapture(0)
-
-labelled_data = []
+raw_data = []
 
 try:
     while True:
@@ -28,18 +27,38 @@ try:
             # each frame is a np array with shape 480*640*3
             frame = imutils.resize(frame, width=640)
             cv.imshow('Video_small', frame)
-            raveled = np.append(frame.ravel(),label)
-            # each row would contain (921601,) which 480*640*3 video elements + 1 label 
-            labelled_data.append(raveled)
+            raw_data.append(frame)            
 
             if cv.waitKey(1) == ord('q'):
                 raise KeyboardInterrupt
 
         except KeyboardInterrupt:
-            print("User Interrupt. Saving labelled data...")
+            print("User Interrupt. Detecting Faces in the Frame and Extracting landmarks on Faces...\n")
+            detector = dlib.get_frontal_face_detector()
+            predictor = dlib.shape_predictor("content/shape_predictor_68_face_landmarks.dat")
+            labelled_data = []
+            for data in raw_data:
+                gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+                faces = detector(gray)
+
+                if len(faces) == 1:
+                    landmarks = predictor(gray, faces[0])
+                    face_points = []
+                    for point in landmarks.parts():
+                        face_points.append([point.x, point.y])
+                    raveled = np.append(np.asarray(face_points).flatten(), label)
+                    labelled_data.append(raveled)
+
+                # each row would contain (68*2+1,) 
+                # which is (face has 68 face landmarks elements) + 1 label 
+                # default the number of face is 1
+
+            print('Extraction finished. Saving labelled data...\n')
             labelled_data = np.asarray(labelled_data)
             with open(os.path.join(data_dir, filename), "wb") as doc:
                 np.savetxt(doc, labelled_data, delimiter=",")
+            
+            print('Labelled data saved...\n')
             break
 
         except Exception as e:
