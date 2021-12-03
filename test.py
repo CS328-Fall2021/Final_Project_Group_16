@@ -1,63 +1,73 @@
 import cv2 as cv
 import numpy as np
-import dlib, os, imutils
+import dlib, os, imutils, math
 
-class NotEqual(Exception):
-    pass
+raw_data_for_current_label = [0,1,2,3,4,5,6,7,8,]
+size_of_raw_data = len(raw_data_for_current_label)
+data_for_current_label = []
+for i in range(math.ceil(size_of_raw_data/5)):
+    if (i+1)*20 > size_of_raw_data:
+        data_for_current_label.append(raw_data_for_current_label[i*5:])
+    else:
+        data_for_current_label.append(raw_data_for_current_label[i*5:(i+1)*5])
 
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("content/shape_predictor_68_face_landmarks.dat")
+print(len(data_for_current_label))
+# class NotEqual(Exception):
+#     pass
 
-label = 0
+# detector = dlib.get_frontal_face_detector()
+# predictor = dlib.shape_predictor("content/shape_predictor_68_face_landmarks.dat")
 
-filename="eye-data-Chang.csv"#"eye-data-Chang-0.csv"
+# label = 0
 
-data_dir = "data"
+# filename="eye-data-Chang.csv"#"eye-data-Chang-0.csv"
 
-if not os.path.exists(data_dir):
-    os.mkdir(data_dir)
+# data_dir = "data"
 
-labelled_data = []
+# if not os.path.exists(data_dir):
+#     os.mkdir(data_dir)
 
-cap = cv.VideoCapture(0, cv.CAP_DSHOW)
+# labelled_data = []
 
-temp = None
-while True:
-    try:
-        _, frame = cap.read()
-        # cv.imshow('Video', frame)
-        frame = imutils.resize(frame, width=640)
-        cv.imshow('Video_small', frame)
-        # raveled = np.append(frame.ravel(),label)
-        # labelled_data.append(raveled)
+# cap = cv.VideoCapture(0, cv.CAP_DSHOW)
 
-        if temp is None:
-            temp = frame
-            gray = cv.cvtColor(temp, cv.COLOR_BGR2GRAY)
-            faces = detector(gray)
-            if len(faces) == 0:
-                temp = None
-                continue
-            print(len(faces))
-            landmarks = predictor(gray, faces[0])
-            face_points = []
-            for point in landmarks.parts():
-                face_points.append([point.x, point.y])
-            print(np.asarray(face_points).flatten())
-            # print(landmarks.part(0).x)
-            # print(landmarks.parts()[0])
+# temp = None
+# while True:
+#     try:
+#         _, frame = cap.read()
+#         # cv.imshow('Video', frame)
+#         frame = imutils.resize(frame, width=640)
+#         cv.imshow('Video_small', frame)
+#         # raveled = np.append(frame.ravel(),label)
+#         # labelled_data.append(raveled)
 
-        if cv.waitKey(1) == ord('q'):
-            raise KeyboardInterrupt
+#         if temp is None:
+#             temp = frame
+#             gray = cv.cvtColor(temp, cv.COLOR_BGR2GRAY)
+#             faces = detector(gray)
+#             if len(faces) == 0:
+#                 temp = None
+#                 continue
+#             print(len(faces))
+#             landmarks = predictor(gray, faces[0])
+#             face_points = []
+#             for point in landmarks.parts():
+#                 face_points.append([point.x, point.y])
+#             print(np.asarray(face_points).flatten())
+#             # print(landmarks.part(0).x)
+#             # print(landmarks.parts()[0])
 
-    except KeyboardInterrupt:
-        print("User Interrupt. Saving labelled data...")
-        # # labelled_data = np.asarray(labelled_data)
-        # raveled = np.append(temp.ravel(),label)
-        # labelled_data.append(raveled)
-        # with open(os.path.join(data_dir, filename), "wb") as doc:
-        #     np.savetxt(doc, labelled_data, delimiter=",")
-        break
+#         if cv.waitKey(1) == ord('q'):
+#             raise KeyboardInterrupt
+
+#     except KeyboardInterrupt:
+#         print("User Interrupt. Saving labelled data...")
+#         # # labelled_data = np.asarray(labelled_data)
+#         # raveled = np.append(temp.ravel(),label)
+#         # labelled_data.append(raveled)
+#         # with open(os.path.join(data_dir, filename), "wb") as doc:
+#         #     np.savetxt(doc, labelled_data, delimiter=",")
+#         break
 
 
 # load_temp = np.genfromtxt('data/eye-data-Chang.csv', delimiter=',')
