@@ -17,6 +17,12 @@ class FeatureExtractor():
             VerticalLineRatio.append(vertial_ratio)
         return VerticalLineRatio
 
+    def _getRatioMean(self,ratios):
+        return np.mean(ratios)
+
+    def _getRatioMedian(self,ratios):
+        return np.median(ratios)
+
     def _getEyelength(self,frames):
         # use histrgam to get most common interval and base on the range of it to determine the eye length when open
         Horizontal = []
@@ -26,18 +32,19 @@ class FeatureExtractor():
             Horizontal.append(abs((frame[37][1] + frame[38][1]) / 2 - (frame[40][1] + frame[41][1]) / 2))
         x_hist, x_range = np.histogram(Vertical, bins=4)
         x_max = np.max(x_hist)
-        x_result = np.where(x_hist == x_max)[0].toList()[0]
+        x_result = np.where(x_hist == x_max)[0].tolist()[0]
         x_index = int(x_result)
 
         y_hist, y_range = np.histogram(Horizontal, bins=4)
         y_max = np.max(y_hist)
-        y_result = np.where(y_hist == y_max)[0].toList()[0]
+        y_result = np.where(y_hist == y_max)[0].tolist()[0]
         y_index = int(y_result)
 
         x_length = (x_range[x_index] + x_range[x_index + 1]) / 2
         y_length = (y_range[y_index] + y_range[y_index + 1]) / 2
+        print(x_length,y_length)
 
-        return [x_length], [y_length]
+        return x_length, y_length
 
     def _getHorizontalLineRatio(self, frames, horizontalLength):  # input 1 d array output 1d
         HorizontalLineRatio = []
@@ -62,5 +69,17 @@ class FeatureExtractor():
         y.append("vertical_Eye_Length")
         x.append(VerticalLength)
         y.append("horizontal_Eye_Length")
+        x_ratio = self._getVerticalLineRatio(frames, VerticalLength)
+        y_ratio = self._getHorizontalLineRatio(frames, HorizontalLength)
+        x.append(self._getRatioMean(x_ratio))
+        y.append('vertical_Eye_Ratio_Mean')
+        x.append(self._getRatioMean(y_ratio))
+        y.append('horizontal_Eye_Ratio_Mean')
+        x.append(self._getRatioMedian(x_ratio))
+        y.append('vertical_Eye_Ratio_Median')
+        x.append(self._getRatioMedian(y_ratio))
+        y.append('horizontal_Eye_Ratio_Median')
 
+        print(x)
+        print(y)
         return x, y
