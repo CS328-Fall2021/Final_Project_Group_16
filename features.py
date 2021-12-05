@@ -2,6 +2,7 @@ import numpy as np
 import cv2 as cv
 import math, dlib
 from scipy.signal import lfilter
+from scipy.spatial import distance as dist
 
 
 class FeatureExtractor():
@@ -83,14 +84,47 @@ class FeatureExtractor():
             verticalLine_ratio .append(vertical_ratio)
         return verticalLine_ratio
 
-    def _getLineRatio(self, frames, horizontalLength, VerticalLength):  # x y ratio v/h
-        line_Ratio = []
-        for frame in frames:
-            vertical_length  = (abs(frame[36][0] - frame[39][0]))
-            horizontal_length = (abs((frame[37][1] + frame[38][1]) / 2 - (frame[40][1] + frame[41][1]) / 2))
-            line_Ratio.append(vertical_length/horizontal_length)
-        return line_Ratio
-    # frames is np array with (n # frame,68,2) shape
+    # def _getLineRatio(self, frames, horizontalLength, VerticalLength):  # x y ratio v/h
+    #     line_Ratio = []
+    #     for frame in frames:
+    #         vertical_length  = (abs(frame[36][0] - frame[39][0]))
+    #         horizontal_length = (abs((frame[37][1] + frame[38][1]) / 2 - (frame[40][1] + frame[41][1]) / 2))
+    #         line_Ratio.append(vertical_length/horizontal_length)
+    #     return line_Ratio
+
+    def _getBothEyeRatio(self, frames): # frames is np array with (n # frame,68,2) shape
+        # take the last frame of the window as data
+        # return the left_ratio and right_ratio
+
+        len_frames = len(frames)
+        # left eyes position tuple(x, y)
+        index_36 = frames[len_frames - 1][36]
+        index_37 = frames[len_frames - 1][37]
+        index_38 = frames[len_frames - 1][38]
+        index_39 = frames[len_frames - 1][39]
+        index_40 = frames[len_frames - 1][40]
+        index_41 = frames[len_frames - 1][41]
+
+        A_left = dist.euclidean(index_37, index_41)
+        B_left = dist.euclidean(index_38, index_40)
+        C_left = dist.euclidean(index_36, index_39)
+        left_ratio = (A_left + B_left) / (2.0 * C_left)
+
+        # right eyes position tuple(x, y)
+        index_42 = frames[len_frames - 1][42]
+        index_43 = frames[len_frames - 1][43]
+        index_44 = frames[len_frames - 1][44]
+        index_45 = frames[len_frames - 1][45]
+        index_46 = frames[len_frames - 1][46]
+        index_47 = frames[len_frames - 1][47]
+
+        A_right = dist.euclidean(index_43, index_47)
+        B_right = dist.euclidean(index_44, index_46)
+        C_right = dist.euclidean(index_42, index_45)
+        right_ratio = (A_right + B_right) / (2.0 * C_right)
+
+        return left_ratio, right_ratio
+
     def extract_features(self, frames, debug=True):  # frames: 68 * n frames(time_domain)
         x = []
         y = []
@@ -126,6 +160,11 @@ class FeatureExtractor():
         y.append('right_horizontal_Eye_Ratio_Median')
         # x.append(self._getLineRatio(frames, HorizontalLength, VerticalLength))
         # y.append('VerticalToHorizontalRatio')
+        left_eye_ratio, right_eye_ratio = self._getBothEyeRatio(frames)
+        x.append(left_eye_ratio)
+        y.append('left_eye_ratio')
+        x.append(right_eye_ratio)
+        y.append('right_eye_ratio')
         print(x)
         print(y)
         return x, y
