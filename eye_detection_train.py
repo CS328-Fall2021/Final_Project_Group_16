@@ -48,7 +48,7 @@ for filename in os.listdir(data_dir):
 print("Found data for {} label : {}".format(len(class_names), ", ".join(class_names)))
 
 
-n_features = 6
+n_features = 12
 
 print("Extracting features and labels for {} windows...".format(len(data)))
 sys.stdout.flush()

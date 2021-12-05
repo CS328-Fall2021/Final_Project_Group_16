@@ -10,12 +10,17 @@ class FeatureExtractor():
         self.detector = dlib.get_frontal_face_detector()
         self.predictor = dlib.shape_predictor("content/shape_predictor_68_face_landmarks.dat")
 
-    def _getVerticalLineRatio(self, frames, VerticalLength):
-        VerticalLineRatio = []
+    def _getHorizontalLineRatio(self, frames, HorizontalLength, which_eye):
+        HorizontalLineRatio = []
+        most_left_index = 36
+        most_right_index = 39
+        if which_eye == 'right':
+            most_left_index = 42
+            most_right_index = 45
         for frame in frames:
-            vertial_ratio = abs(frame[36][0] - frame[39][0])/VerticalLength
-            VerticalLineRatio.append(vertial_ratio)
-        return VerticalLineRatio
+            horizontal_ratio = abs(frame[most_left_index][0] - frame[most_right_index][0])/HorizontalLength
+            HorizontalLineRatio.append(horizontal_ratio)
+        return HorizontalLineRatio
 
     def _getRatioMean(self,ratios):
         return np.mean(ratios)
@@ -43,14 +48,14 @@ class FeatureExtractor():
         Horizontal = []
         Vertical = []
         for frame in frames:
-            Vertical.append(abs(frame[most_left_index][0] - frame[most_right_index][0]))
-            Horizontal.append(abs((frame[top_1_index][1] + frame[top_2_index][1]) / 2 - (frame[bottom_2_index][1] + frame[bottom_1_index][1]) / 2))
-        x_hist, x_range = np.histogram(Vertical, bins=4)
+            Horizontal.append(abs(frame[most_left_index][0] - frame[most_right_index][0]))
+            Vertical.append(abs((frame[top_1_index][1] + frame[top_2_index][1]) / 2 - (frame[bottom_2_index][1] + frame[bottom_1_index][1]) / 2))
+        x_hist, x_range = np.histogram(Horizontal, bins=4)
         x_max = np.max(x_hist)
         x_result = np.where(x_hist == x_max)[0].tolist()[0]
         x_index = int(x_result)
 
-        y_hist, y_range = np.histogram(Horizontal, bins=4)
+        y_hist, y_range = np.histogram(Vertical, bins=4)
         y_max = np.max(y_hist)
         y_result = np.where(y_hist == y_max)[0].tolist()[0]
         y_index = int(y_result)
@@ -60,12 +65,23 @@ class FeatureExtractor():
 
         return x_length, y_length
 
-    def _getHorizontalLineRatio(self, frames, horizontalLength):  # input 1 d array output 1d
-        HorizontalLineRatio = []
+    def _getVerticalLineRatio(self, frames, verticalLength,which_eye):  # input 1 d array output 1d
+
+        top_1_index = 37
+        top_2_index = 38
+        bottom_1_index = 41
+        bottom_2_index = 40
+        if which_eye == 'right':
+            top_1_index = 43
+            top_2_index = 44
+            bottom_1_index = 47
+            bottom_2_index = 46
+        verticalLine_ratio = []
         for frame in frames:
-            horizontal_ratio = abs((frame[37][1] + frame[38][1]) / 2 - (frame[40][1] + frame[41][1]) / 2) / horizontalLength
-            HorizontalLineRatio .append(horizontal_ratio)
-        return HorizontalLineRatio 
+            vertical_ratio = abs((frame[top_1_index][1] + frame[top_2_index][1]) / 2
+                                   - (frame[bottom_2_index][1] + frame[bottom_1_index][1]) / 2)/ verticalLength
+            verticalLine_ratio .append(vertical_ratio)
+        return verticalLine_ratio
 
     def _getLineRatio(self, frames, horizontalLength, VerticalLength):  # x y ratio v/h
         line_Ratio = []
@@ -74,13 +90,12 @@ class FeatureExtractor():
             horizontal_length = (abs((frame[37][1] + frame[38][1]) / 2 - (frame[40][1] + frame[41][1]) / 2))
             line_Ratio.append(vertical_length/horizontal_length)
         return line_Ratio
-    # frame is np array with (480,640,3) shape
+    # frames is np array with (n # frame,68,2) shape
     def extract_features(self, frames, debug=True):  # frames: 68 * n frames(time_domain)
         x = []
         y = []
-        eye_points = [[36, 39, 37, 38, 41, 40], [42, 45, 43, 44, 47, 46]]
-        left_VerticalLength, left_HorizontalLength = self._getEyelength(frames,'left')
-        right_VerticalLength, right_HorizontalLength = self._getEyelength(frames, 'right')
+        left_HorizontalLength, left_VerticalLength = self._getEyelength(frames, 'left')
+        right_HorizontalLength, right_VerticalLength = self._getEyelength(frames, 'right')
         x.append(left_VerticalLength)
         y.append("left_vertical_Eye_Length")
         x.append(left_HorizontalLength)
@@ -89,20 +104,28 @@ class FeatureExtractor():
         y.append("right_vertical_Eye_Length")
         x.append(right_HorizontalLength)
         y.append("right_horizontal_Eye_Length")
-        left_x_ratio = self._getVerticalLineRatio(frames, left_VerticalLength,'left')
-        left_y_ratio = self._getHorizontalLineRatio(frames, left_HorizontalLength,'left')
-        right_x_ratio = self._getVerticalLineRatio(frames, right_VerticalLength,'left')
-        right_y_ratio = self._getHorizontalLineRatio(frames, right_HorizontalLength,'left')
-        x.append(self._getRatioMean(x_ratio,'left'))
-        y.append('vertical_Eye_Ratio_Mean')
-        x.append(self._getRatioMean(y_ratio))
-        y.append('horizontal_Eye_Ratio_Mean')
-        x.append(self._getRatioMedian(x_ratio))
-        y.append('vertical_Eye_Ratio_Median')
-        x.append(self._getRatioMedian(y_ratio))
-        y.append('horizontal_Eye_Ratio_Median')
-        x.append(self._getLineRatio(frames, HorizontalLength, VerticalLength))
-        y.append('VerticalToHorizontalRatio')
+        left_x_ratio = self._getHorizontalLineRatio(frames, left_HorizontalLength, 'left')
+        left_y_ratio = self._getVerticalLineRatio(frames, left_VerticalLength, 'left')
+        right_x_ratio = self._getHorizontalLineRatio(frames, right_HorizontalLength, 'right')
+        right_y_ratio = self._getVerticalLineRatio(frames, right_VerticalLength, 'right')
+        x.append(self._getRatioMean(left_x_ratio))
+        y.append('left_vertical_Eye_Ratio_Mean')
+        x.append(self._getRatioMean(left_y_ratio))
+        y.append('left_horizontal_Eye_Ratio_Mean')
+        x.append(self._getRatioMean(right_x_ratio))
+        y.append('right_vertical_Eye_Ratio_Mean')
+        x.append(self._getRatioMean(right_y_ratio))
+        y.append('right_horizontal_Eye_Ratio_Mean')
+        x.append(self._getRatioMedian(left_x_ratio))
+        y.append('left_vertical_Eye_Ratio_Median')
+        x.append(self._getRatioMedian(left_y_ratio))
+        y.append('left_horizontal_Eye_Ratio_Median')
+        x.append(self._getRatioMedian(right_x_ratio))
+        y.append('right_vertical_Eye_Ratio_Median')
+        x.append(self._getRatioMedian(right_y_ratio))
+        y.append('right_horizontal_Eye_Ratio_Median')
+        # x.append(self._getLineRatio(frames, HorizontalLength, VerticalLength))
+        # y.append('VerticalToHorizontalRatio')
         print(x)
         print(y)
         return x, y
