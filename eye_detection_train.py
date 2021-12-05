@@ -48,7 +48,7 @@ for filename in os.listdir(data_dir):
 print("Found data for {} label : {}".format(len(class_names), ", ".join(class_names)))
 
 
-n_features = 2
+n_features = 6
 
 print("Extracting features and labels for {} windows...".format(len(data)))
 sys.stdout.flush()
@@ -76,7 +76,7 @@ for i, window_frames_with_label in enumerate(data):
     # print(frames_three_dimention_data[0])
     
     # window would be WINDOW_SIZE*68*2 for x,y coordinate for 68 points for WINDOW_SIZE numbers of frames
-    x = feature_extractor.extract_features(frames_three_dimention_data)
+    x,y = feature_extractor.extract_features(frames_three_dimention_data)
     if (len(x) != X.shape[1]):
         print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
     X = np.append(X, np.reshape(x, (1,-1)), axis=0)
@@ -99,7 +99,7 @@ total_accuracy = 0.0
 total_precision = [0.0, 0.0, 0.0, 0.0]
 total_recall = [0.0, 0.0, 0.0, 0.0]
 
-cv = KFold(n_splits=10, shuffle=True, random_state=None)
+cv = KFold(n_splits=2, shuffle=True, random_state=None)
 for i, (train_index, test_index) in enumerate(cv.split(X)):
 	X_train, X_test = X[train_index], X[test_index]
 	y_train, y_test = y[train_index], y[test_index]
