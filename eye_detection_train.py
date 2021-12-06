@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from features import FeatureExtractor
 from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
+from timeit import default_timer as timer
 import pickle
 import math
 from utils import data_dir, output_dir, class_labels, WINDOW_SIZE, detector, predictor, NoLabelDetectedIntheFrame
@@ -19,9 +20,9 @@ data = []
 for filename in os.listdir(data_dir):
     if filename.endswith(".csv") and filename.startswith("eye-data"):
         filename_components = filename.split("-")
-        label_index = int(filename_components[2])
+        label_index = int(filename_components[2].strip('.csv'))
         eye_label = class_labels[label_index]
-        print("Loading data for {}.".format(eye_label))
+        print("\nLoading data for {}.".format(eye_label))
         if eye_label not in class_names:
             class_names.append(eye_label)
         sys.stdout.flush()
@@ -45,7 +46,7 @@ print("Found data for {} label : {}".format(len(class_names), ", ".join(class_na
 
 n_features = 16
 
-print("Extracting features and labels for {} windows...".format(len(data)))
+print("\nExtracting features and labels for {} windows...".format(len(data)))
 sys.stdout.flush()
 
 X = np.zeros((0, n_features))
@@ -58,6 +59,9 @@ feature_extractor = FeatureExtractor(debug=False)
 # data is list in format [frames, frames, ....]
 # frames is list in format [frame, frame, ....]
 # frame is np array with shape (68*2+1)*1  
+print('Timer started...')
+extract_start = timer()
+
 for i, window_frames_with_label in enumerate(data):
     frames_three_dimention_data = []
     label = None
@@ -77,6 +81,8 @@ for i, window_frames_with_label in enumerate(data):
     X = np.append(X, np.reshape(x, (1, -1)), axis=0)
     y = np.append(y, label)
 
+extract_end = timer()
+print("Extracted features in {:.1f} minutes".format((extract_end-extract_start)/60))
 print("Finished feature extraction over {} windows".format(len(X)))
 print("Unique labels found: {}".format(set(y)))
 sys.stdout.flush()

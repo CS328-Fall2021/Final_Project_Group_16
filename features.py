@@ -182,9 +182,10 @@ class FeatureExtractor():
         y.append('left_eye_range_max')
         x.append(right_range_max)
         y.append('right_eye_range_max')
-        print(x)
-        print(y)
-        print(len(x))
-        print(len(y) == len(x))
+        # if debug:
+        #     print(x)
+        #     print(y)
+        #     print(len(x))
+        #     print(len(y) == len(x))
 
         return x, y
