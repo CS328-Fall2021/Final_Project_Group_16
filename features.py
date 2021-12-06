@@ -126,7 +126,7 @@ class FeatureExtractor():
             B_right = dist.euclidean(index_44, index_46)
             C_right = dist.euclidean(index_42, index_45)
             right_ratio = (A_right + B_right) / (2.0 * C_right)
-            right_ratio_lst.append(left_ratio)
+            right_ratio_lst.append(right_ratio)
         #apply histogram
         left_hist, left_range = np.histogram(left_ratio_lst, 4)
         left_range_min = left_range[0]
