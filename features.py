@@ -129,12 +129,12 @@ class FeatureExtractor():
             right_ratio_lst.append(right_ratio)
         #apply histogram
         left_hist, left_range = np.histogram(left_ratio_lst, 4)
-        left_range_min = left_range[0]
-        left_range_max = left_range[-1]
+        left_range_min = left_range[1]
+        left_range_max = left_range[-2]
 
         right_hist, right_range = np.histogram(right_ratio_lst, 4)
-        right_range_min = right_range[0]
-        right_range_max = right_range[-1]
+        right_range_min = right_range[1]
+        right_range_max = right_range[-2]
 
         return left_range_min, left_range_max, right_range_min, right_range_max
 
