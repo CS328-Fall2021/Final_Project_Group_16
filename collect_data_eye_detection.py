@@ -2,13 +2,13 @@ import os
 import cv2 as cv
 import numpy as np
 import imutils, dlib
-from utils import data_dir, detector, predictor, FONT
+from utils import data_dir, detector, predictor, FONT, draw_eye, midpoint, eye_points
 
 
 # class_labels = ['eye open', 'blinking', 'frown']
 # labels_index = [    0     ,      1    ,    2   ]
 
-label = 0
+label = 3
 
 filename="eye-data-{}.csv".format(label)#"eye-data-1.csv"
 
@@ -32,7 +32,8 @@ try:
 
             # each frame is a np array with shape 480*640*3
             frame = imutils.resize(frame, width=640)
-            cv.imshow('Video_small', frame)
+            cv.putText(frame, 'Recording', (50,150), FONT, 1, (255,0,0))
+            cv.imshow('Eye Movement Classification', frame)
             raw_data.append(frame)      
 
             waited = cv.waitKey(1)
