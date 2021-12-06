@@ -60,8 +60,6 @@ try:
     notready = True
     cur_samples = []
     while True:
-        
-
         _, frame = cap.read()
         
         if notready:

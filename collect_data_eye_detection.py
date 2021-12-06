@@ -2,7 +2,7 @@ import os
 import cv2 as cv
 import numpy as np
 import imutils, dlib
-from utils import data_dir, detector, predictor
+from utils import data_dir, detector, predictor, FONT
 
 
 # class_labels = ['eye open', 'blinking', 'frown']
@@ -17,14 +17,23 @@ cap = cv.VideoCapture(0, cv.CAP_DSHOW)
 raw_data = []
 
 try:
+    notready = True
     while True:
         try:
             _, frame = cap.read()
+            if notready:
+                cv.putText(frame, 'Press R When You Ready', (50,150), FONT, 1, (255,0,0))
+                cv.imshow("Eye Movement Classification", frame)
+
+                if cv.waitKey(1) == ord('r'): notready = False
+                if cv.waitKey(1) == ord('q'): raise KeyboardInterrupt
+                continue
             # each frame is a np array with shape 480*640*3
             frame = imutils.resize(frame, width=640)
             cv.imshow('Video_small', frame)
-            raw_data.append(frame)            
+            raw_data.append(frame)      
 
+            if cv.waitKey(1) == ord('p'): notready = True
             if cv.waitKey(1) == ord('q'):
                 raise KeyboardInterrupt
 
