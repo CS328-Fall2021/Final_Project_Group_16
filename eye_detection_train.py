@@ -5,7 +5,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from features import FeatureExtractor
 from sklearn.model_selection import KFold
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, precision_score, recall_score
 from timeit import default_timer as timer
 import pickle
 import math
@@ -75,7 +75,7 @@ for i, window_frames_with_label in enumerate(data):
     # print(frames_three_dimention_data[0])
 
     # window would be WINDOW_SIZE*68*2 for x,y coordinate for 68 points for WINDOW_SIZE numbers of frames
-    x, y = feature_extractor.extract_features(frames_three_dimention_data)
+    x, features_names = feature_extractor.extract_features(frames_three_dimention_data)
     if len(x) != X.shape[1]:
         print("Received feature vector of length {}. Expected feature vector of length {}.".format(len(x), X.shape[1]))
     X = np.append(X, np.reshape(x, (1, -1)), axis=0)
@@ -144,7 +144,7 @@ for i, (train_index, test_index) in enumerate(cv.split(X)):
     clf = RandomForestClassifier(n_estimators=100)
     clf.fit(X_train, y_train)
 
-    print("Evaluating classifier over {} points...".format(len(y_test)))
+    print("Evaluating classifier over {} windows...".format(len(y_test)))
     # predict the labels on the test data
     y_pred = clf.predict(X_test)
 

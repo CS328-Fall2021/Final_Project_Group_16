@@ -8,7 +8,7 @@ import os, sys, random
 
 
 classifier_filename = 'classifier.pickle'
-debug = True
+debug = False
 
 if not debug:
     with open(os.path.join(output_dir, classifier_filename), 'rb') as f:
