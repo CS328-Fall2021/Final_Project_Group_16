@@ -2,11 +2,11 @@ import os
 import dlib
 import cv2 as cv
 
-WINDOW_SIZE = 5 # how many frames in each window
+WINDOW_SIZE = 15 # how many frames in each window
 
 FONT = cv.FONT_HERSHEY_SIMPLEX
 
-class_labels = ['eye open', 'blinking', 'frown', 'staring']
+class_labels = ['Eye Open', 'Blinking', 'Frown', 'Staring']
 # class_labels = ['eye open', 'blinking', 'frown']
 labels_index = [    0     ,     1     ,    2   ,     3    ]
 

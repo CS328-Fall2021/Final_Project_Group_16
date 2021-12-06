@@ -1,14 +1,12 @@
-import os
-import sys
-import numpy as np
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from features import FeatureExtractor
+import os, sys, pickle, math
+from sklearn import model_selection
 from sklearn.model_selection import KFold
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import confusion_matrix, precision_score, recall_score
+import numpy as np
 from timeit import default_timer as timer
-import pickle
-import math
+from features import FeatureExtractor
 from utils import data_dir, output_dir, class_labels, WINDOW_SIZE, detector, predictor, NoLabelDetectedIntheFrame
 
 # csv should be named as eye-data-Chang-0.csv
@@ -16,13 +14,14 @@ from utils import data_dir, output_dir, class_labels, WINDOW_SIZE, detector, pre
 class_names = []
 
 data = []
+classifier_filename = 'classifier.pickle'
 
 for filename in os.listdir(data_dir):
     if filename.endswith(".csv") and filename.startswith("eye-data"):
         filename_components = filename.split("-")
         label_index = int(filename_components[2].strip('.csv'))
         eye_label = class_labels[label_index]
-        print("\nLoading data for {}.".format(eye_label))
+        print("\nLoading data for '{}'.".format(eye_label))
         if eye_label not in class_names:
             class_names.append(eye_label)
         sys.stdout.flush()
@@ -44,7 +43,7 @@ for filename in os.listdir(data_dir):
 
 print("Found data for {} label : {}".format(len(class_names), ", ".join(class_names)))
 
-n_features = 16
+n_features = 4
 
 print("\nExtracting features and labels for {} windows...".format(len(data)))
 sys.stdout.flush()
@@ -92,84 +91,27 @@ n_classes = len(class_names)
 
 print("\n")
 print("---------------------- Decision Tree -------------------------")
+#		                Train & Evaluate Classifier
 
-total_accuracy = 0.0
-total_precision = [0.0, 0.0, 0.0, 0.0]
-total_recall = [0.0, 0.0, 0.0, 0.0]
-
-cv = KFold(n_splits=2, shuffle=True, random_state=None)
-for i, (train_index, test_index) in enumerate(cv.split(X)):
+cv = model_selection.KFold(n_splits=10, random_state=None, shuffle=True)
+for index, (train_index, test_index) in enumerate(cv.split(X)):
+    tree = DecisionTreeClassifier(criterion="entropy")
+    #print("Train: ", train_index, "Test: ", test_index)
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
-    tree = DecisionTreeClassifier(criterion="entropy", max_depth=3)
-    print("Fold {} : Training decision tree classifier over {} points...".format(i, len(y_train)))
-    sys.stdout.flush()
     tree.fit(X_train, y_train)
-    print("Evaluating classifier over {} points...".format(len(y_test)))
+    y_pre = tree.predict(X_test)
+    conf = confusion_matrix(y_test, y_pre)
+    print('\nFold: {:>2}'.format(index+1))
+    print('Confusion Matrix:')
+    print(conf)
+    print('Average Accuracy: ', tree.score(X_test, y_test))
+    print('Precision Value: ', precision_score(y_test, y_pre, average='micro'))
+    print('Recall Value: ', recall_score(y_test, y_pre, average='micro'))
 
-    # predict the labels on the test data
-    y_pred = tree.predict(X_test)
-
-    # show the comparison between the predicted and ground-truth labels
-    print(f"y_test: {y_test}")
-    print(f"y_pred: {y_pred}")
-    conf = confusion_matrix(y_test, y_pred, labels=[0, 1, 2, 3])
-
-    accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
-    precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
-    recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
-
-    total_accuracy += accuracy
-    total_precision += precision
-    total_recall += recall
-
-print("The average accuracy is {}".format(total_accuracy / 10.0))
-print("The average precision is {}".format(total_precision / 10.0))
-print("The average recall is {}".format(total_recall / 10.0))
-
-print("Training decision tree classifier on entire dataset...")
+tree = DecisionTreeClassifier(criterion="entropy")
 tree.fit(X, y)
-
-print("\n")
-print("---------------------- Random Forest Classifier -------------------------")
-total_accuracy = 0.0
-total_precision = [0.0, 0.0, 0.0, 0.0]
-total_recall = [0.0, 0.0, 0.0, 0.0]
-
-for i, (train_index, test_index) in enumerate(cv.split(X)):
-    X_train, X_test = X[train_index], X[test_index]
-    y_train, y_test = y[train_index], y[test_index]
-    print("Fold {} : Training Random Forest classifier over {} points...".format(i, len(y_train)))
-    sys.stdout.flush()
-    clf = RandomForestClassifier(n_estimators=100)
-    clf.fit(X_train, y_train)
-
-    print("Evaluating classifier over {} windows...".format(len(y_test)))
-    # predict the labels on the test data
-    y_pred = clf.predict(X_test)
-
-    # show the comparison between the predicted and ground-truth labels
-    conf = confusion_matrix(y_test, y_pred, labels=[0, 1, 2, 3])
-
-    accuracy = np.sum(np.diag(conf)) / float(np.sum(conf))
-    precision = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=1).astype(float))
-    recall = np.nan_to_num(np.diag(conf) / np.sum(conf, axis=0).astype(float))
-
-    total_accuracy += accuracy
-    total_precision += precision
-    total_recall += recall
-
-print("The average accuracy is {}".format(total_accuracy / 10.0))
-print("The average precision is {}".format(total_precision / 10.0))
-print("The average recall is {}".format(total_recall / 10.0))
-
-# TODO: (optional) train other classifiers and print the average metrics using 10-fold cross-validation
-
-# Set this to the best model you found, trained on all the data:
-best_classifier = RandomForestClassifier(n_estimators=100)
-best_classifier.fit(X, y)
-
-classifier_filename = 'classifier.pickle'
-print("Saving best classifier to {}...".format(os.path.join(output_dir, classifier_filename)))
-with open(os.path.join(output_dir, classifier_filename), 'wb') as f:  # 'wb' stands for 'write bytes'
-    pickle.dump(best_classifier, f)
+export_graphviz(tree, out_file=os.path.join(output_dir, 'sample.dot'), feature_names=features_names, class_names=class_names)
+with open(os.path.join(output_dir, classifier_filename), 'wb') as f:
+    pickle.dump(tree, f)
+f.close()
