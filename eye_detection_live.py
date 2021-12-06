@@ -66,9 +66,9 @@ try:
             cv.putText(frame, 'Press R When You Ready', (50,150), FONT, 1, (255,0,0))
             cv.imshow("Eye Movement Classification", frame)
 
-            if cv.waitKey(1) == ord('r'): notready = False
-            if cv.waitKey(1) == ord('q'): raise KeyboardInterrupt
-
+            waited = cv.waitKey(1)
+            if waited == ord('r'): notready = False
+            if waited == ord('q'): raise KeyboardInterrupt
             continue
         
         gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
@@ -95,8 +95,11 @@ try:
                 cur_samples.clear()
 
         cv.imshow("Eye Movement Classification", frame)
-        if cv.waitKey(1) == ord('p'): notready = True
-        if cv.waitKey(1) == ord('q'): raise KeyboardInterrupt
+
+
+        waited = cv.waitKey(1)
+        if waited == ord('p'): notready = True
+        if waited == ord('q'): raise KeyboardInterrupt
             
 except KeyboardInterrupt:
     print('User Keyboard Interrupt...')
