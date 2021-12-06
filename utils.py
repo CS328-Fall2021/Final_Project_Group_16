@@ -8,7 +8,7 @@ FONT = cv.FONT_HERSHEY_SIMPLEX
 
 class_labels = ['blinking', 'eye open', 'frown']
 # class_labels = ['blinking', 'eye open', 'frown']
-# labels_index = [    0     ,      1    ,    2   ]
+labels_index = [    0     ,      1    ,    2   ]
 
 eye_points = [[36,39,37,38,41,40],[42,45,43,44,47,46]]
 
