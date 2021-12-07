@@ -33,12 +33,9 @@ def ActivityDetected(frame, activity):
 def predict(last_frame, window):
     
     X, feature_names = feature_extractor.extract_features(window)
-    print('pass')
     X = np.reshape(X,(1,-1))
     if not debug:
-        print('pass')
         index = classifier.predict(X) 
-        print('pass')
     else:
         index = random.choice(labels_index)
     return ActivityDetected(last_frame, index) 
@@ -64,9 +61,6 @@ try:
         faces = detector(gray)
 
         if len(faces) == 1:
-            #x, y = face.left(), face.top()
-            #x1, y1 = face.right(), face.bottom()
-            #cv.rectangle(frame, (x, y), (x1, y1), (0, 255, 0), 2)
 
             landmarks = predictor(gray, faces[0])
             face_points = []
@@ -86,7 +80,9 @@ try:
 
 
         waited = cv.waitKey(1)
-        if waited == ord('p'): notready = True
+        if waited == ord('p'): 
+            notready = True
+            print('User Paused...')
         if waited == ord('q'): raise KeyboardInterrupt
             
 except KeyboardInterrupt:

@@ -43,9 +43,10 @@ for filename in os.listdir(data_dir):
 
 print("Found data for {} label : {}".format(len(class_names), ", ".join(class_names)))
 
-n_features = 4
+n_features = 16
 
 print("\nExtracting features and labels for {} windows...".format(len(data)))
+print('Window Size: {}'.format(WINDOW_SIZE))
 sys.stdout.flush()
 
 X = np.zeros((0, n_features))
@@ -102,12 +103,12 @@ for index, (train_index, test_index) in enumerate(cv.split(X)):
     tree.fit(X_train, y_train)
     y_pre = tree.predict(X_test)
     conf = confusion_matrix(y_test, y_pre)
-    print('\nFold: {:>2}'.format(index+1))
-    print('Confusion Matrix:')
-    print(conf)
-    print('Average Accuracy: ', tree.score(X_test, y_test))
-    print('Precision Value: ', precision_score(y_test, y_pre, average='micro'))
-    print('Recall Value: ', recall_score(y_test, y_pre, average='micro'))
+#     print('\nFold: {:>2}'.format(index+1))
+#     print('Confusion Matrix:')
+#     print(conf)
+#     print('Average Accuracy: ', tree.score(X_test, y_test))
+#     print('Precision Value: ', precision_score(y_test, y_pre, average='micro'))
+#     print('Recall Value: ', recall_score(y_test, y_pre, average='micro'))
 
 tree = DecisionTreeClassifier(criterion="entropy")
 tree.fit(X, y)

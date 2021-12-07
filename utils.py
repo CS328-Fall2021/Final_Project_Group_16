@@ -2,7 +2,7 @@ import os
 import dlib
 import cv2 as cv
 
-WINDOW_SIZE = 15 # how many frames in each window
+WINDOW_SIZE = 18 # how many frames in each window
 
 FONT = cv.FONT_HERSHEY_SIMPLEX
 
