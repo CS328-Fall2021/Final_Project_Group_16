@@ -22,7 +22,7 @@ feature_extractor = FeatureExtractor(debug=False)
 cap = cv.VideoCapture(0)
 
 def print_activity(frame, activity_str):
-    cv.putText(frame, activity_str, (50,150), FONT, 3, (255,0,0))
+    cv.putText(frame, activity_str, (50,150), FONT, 3, (255,0,0), thickness=3)
     return frame
 
 
@@ -54,7 +54,7 @@ try:
         _, frame = cap.read()
         
         if notready:
-            cv.putText(frame, 'Press R When You Ready', (50,150), FONT, 1, (255,0,0))
+            cv.putText(frame, 'Press R When You Ready', (50,150), FONT, 1, (255,0,0), thickness=3)
             cv.imshow("Eye Movement Classification", frame)
 
             waited = cv.waitKey(1)
