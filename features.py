@@ -171,6 +171,8 @@ class FeatureExtractor():
         C_right = dist.euclidean(index_42, index_45)
         right_ratio = (A_right + B_right) / (2.0 * C_right)
 
+        #print(f"Left_ratio: {left_ratio}")
+
         return left_ratio, right_ratio
 
     def _get_Eyes_ratio_variance(self, frames):
@@ -192,7 +194,34 @@ class FeatureExtractor():
 
         mean = sum(ratio_lst) / len(ratio_lst)
         res = sum((i - mean) ** 2 for i in ratio_lst) / len(ratio_lst)
+
+        #print(f"Eye_Ratio_Variance: {res}")
         return res
+
+    def _get_Eyes_ratio_Difference(self, frames):
+        ratio_lst = []
+        for frame in frames:
+            #print(f"frame: {frame}")
+            # left eyes position tuple(x, y)
+            index_36 = frame[36]
+            index_37 = frame[37]
+            index_38 = frame[38]
+            index_39 = frame[39]
+            index_40 = frame[40]
+            index_41 = frame[41]
+
+            A_left = dist.euclidean(index_37, index_41)
+            B_left = dist.euclidean(index_38, index_40)
+            C_left = dist.euclidean(index_36, index_39)
+            left_ratio = (A_left + B_left) / (2.0 * C_left)
+            ratio_lst.append(left_ratio)
+
+        difference = max(ratio_lst) - min(ratio_lst)
+        # print(ratio_lst)
+        # print(f"max: {max(ratio_lst)}")
+        # print(f"min: {min(ratio_lst)}")
+        # print(f"Eye_Ratio_Difference: {difference}")
+        return difference
 
     def _get_Eye_Vertical_Length(self, frames): # frames is np array with (n # frame,68,2) shape
         # take the last frame of the window as data
@@ -201,8 +230,8 @@ class FeatureExtractor():
         len_frames = len(frames)
         frame = frames[len_frames-1]
         # left eyes position tuple(x, y)
-        index_19 = frame[19][1]
-        index_6 = frame[6][1]
+        index_21 = frame[21][1]
+        index_28 = frame[28][1]
 
         index_37 = frame[37][1]
         index_38 = frame[38][1]
@@ -210,15 +239,15 @@ class FeatureExtractor():
         index_40 = frame[40][1]
         index_41 = frame[41][1]
 
-        left_face_length = abs(index_19 - index_6)
+        left_face_length = abs(index_21 - index_28)
         A_left = abs(index_37 - index_41)
         B_left = abs(index_38 - index_40)
         left_eye_ratio = ((A_left + B_left)/2)/left_face_length
 
 
         # right eyes position tuple(x, y)
-        index_24 = frame[24][1]
-        index_10 = frame[10][1]
+        index_22 = frame[22][1]
+        index_28 = frame[28][1]
 
         index_43 = frame[43][1]
         index_44 = frame[44][1]
@@ -226,12 +255,16 @@ class FeatureExtractor():
         index_46 = frame[46][1]
         index_47 = frame[47][1]
 
-        right_face_length = abs(index_24 - index_10)
+        right_face_length = abs(index_22 - index_28)
         A_left = abs(index_43 - index_47)
         B_left = abs(index_44 - index_46)
         right_eye_ratio = ((A_left + B_left)/2)/right_face_length
 
-        return (left_eye_ratio + right_eye_ratio)/2
+        res = (left_eye_ratio + right_eye_ratio)/2
+
+        #print(f"Eye_Vertical_Length: {res}")
+
+        return res
 
     def extract_features(self, frames, debug=True):  # frames: 68 * n frames(time_domain)
         x = []
@@ -285,8 +318,8 @@ class FeatureExtractor():
         y_length = self._get_Eye_Vertical_Length(frames)
         x.append(y_length)
         y.append('Eyes_Vertical_Ratio')
-        x.append(self._get_Eyes_ratio_variance(frames))
-        y.append('Left_Ratio_Variance')
+        x.append(self._get_Eyes_ratio_Difference(frames))
+        y.append('Left_Ratio_Difference')
         # if debug:
         #     print(x)
         #     print(y)

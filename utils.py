@@ -2,13 +2,13 @@ import os
 import dlib
 import cv2 as cv
 
-WINDOW_SIZE = 10 # how many frames in each window
+WINDOW_SIZE = 22 # how many frames in each window
 
 FONT = cv.FONT_HERSHEY_SIMPLEX
 
-class_labels = ['Eye Open', 'Blinking', 'Frown', 'Staring']
+class_labels = ['Eye Open', 'Blinking', 'Frown', 'Staring', 'Eye Close']
 # class_labels = ['eye open', 'blinking', 'frown']
-labels_index = [    0     ,     1     ,    2   ,     3    ]
+labels_index = [    0     ,     1     ,    2   ,     3    ,     4     ]
 
 eye_points = [[36,39,37,38,41,40],[42,45,43,44,47,46]]
 

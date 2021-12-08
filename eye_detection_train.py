@@ -106,9 +106,9 @@ for index, (train_index, test_index) in enumerate(cv.split(X)):
 #     print('\nFold: {:>2}'.format(index+1))
 #     print('Confusion Matrix:')
 #     print(conf)
-#     print('Average Accuracy: ', tree.score(X_test, y_test))
-#     print('Precision Value: ', precision_score(y_test, y_pre, average='micro'))
-#     print('Recall Value: ', recall_score(y_test, y_pre, average='micro'))
+    print('Average Accuracy: ', tree.score(X_test, y_test))
+    print('Precision Value: ', precision_score(y_test, y_pre, average='micro'))
+    print('Recall Value: ', recall_score(y_test, y_pre, average='micro'))
 
 tree = DecisionTreeClassifier(criterion="entropy")
 tree.fit(X, y)
