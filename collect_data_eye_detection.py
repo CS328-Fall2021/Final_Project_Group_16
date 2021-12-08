@@ -50,7 +50,7 @@ try:
 
                 if len(faces) == 1:
                     landmarks = predictor(gray, faces[0])
-                    print(landmarks.parts())
+                    # print(landmarks.parts())
                     face_points = []
                     for point in landmarks.parts():
                         face_points.append([point.x, point.y])
