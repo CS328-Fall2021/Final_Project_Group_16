@@ -92,13 +92,89 @@ class FeatureExtractor():
     #         line_Ratio.append(vertical_length/horizontal_length)
     #     return line_Ratio
 
+    # def _getBothEyeRatio(self, frames): # frames is np array with (n # frame,68,2) shape
+    #     # take the last frame of the window as data
+    #     # return the left_ratio and right_ratio
+    #
+    #     left_ratio_lst = []
+    #     right_ratio_lst = []
+    #
+    #     for frame in frames:
+    #         # left eyes position tuple(x, y)
+    #         index_36 = frame[36]
+    #         index_37 = frame[37]
+    #         index_38 = frame[38]
+    #         index_39 = frame[39]
+    #         index_40 = frame[40]
+    #         index_41 = frame[41]
+    #
+    #         A_left = dist.euclidean(index_37, index_41)
+    #         B_left = dist.euclidean(index_38, index_40)
+    #         C_left = dist.euclidean(index_36, index_39)
+    #         left_ratio = (A_left + B_left) / (2.0 * C_left)
+    #         left_ratio_lst.append(left_ratio)
+    #
+    #         # right eyes position tuple(x, y)
+    #         index_42 = frame[42]
+    #         index_43 = frame[43]
+    #         index_44 = frame[44]
+    #         index_45 = frame[45]
+    #         index_46 = frame[46]
+    #         index_47 = frame[47]
+    #
+    #         A_right = dist.euclidean(index_43, index_47)
+    #         B_right = dist.euclidean(index_44, index_46)
+    #         C_right = dist.euclidean(index_42, index_45)
+    #         right_ratio = (A_right + B_right) / (2.0 * C_right)
+    #         right_ratio_lst.append(right_ratio)
+    #     #apply histogram
+    #     left_hist, left_range = np.histogram(left_ratio_lst, 4)
+    #     left_range_min = left_range[1]
+    #     left_range_max = left_range[-2]
+    #
+    #     right_hist, right_range = np.histogram(right_ratio_lst, 4)
+    #     right_range_min = right_range[1]
+    #     right_range_max = right_range[-2]
+    #
+    #     return left_range_min, left_range_max, right_range_min, right_range_max
+
     def _getBothEyeRatio(self, frames): # frames is np array with (n # frame,68,2) shape
         # take the last frame of the window as data
         # return the left_ratio and right_ratio
 
-        left_ratio_lst = []
-        right_ratio_lst = []
+        len_frames = len(frames)
+        frame = frames[len_frames-1]
+        # left eyes position tuple(x, y)
+        index_36 = frame[36]
+        index_37 = frame[37]
+        index_38 = frame[38]
+        index_39 = frame[39]
+        index_40 = frame[40]
+        index_41 = frame[41]
 
+        A_left = dist.euclidean(index_37, index_41)
+        B_left = dist.euclidean(index_38, index_40)
+        C_left = dist.euclidean(index_36, index_39)
+        left_ratio = (A_left + B_left) / (2.0 * C_left)
+
+
+        # right eyes position tuple(x, y)
+        index_42 = frame[42]
+        index_43 = frame[43]
+        index_44 = frame[44]
+        index_45 = frame[45]
+        index_46 = frame[46]
+        index_47 = frame[47]
+
+        A_right = dist.euclidean(index_43, index_47)
+        B_right = dist.euclidean(index_44, index_46)
+        C_right = dist.euclidean(index_42, index_45)
+        right_ratio = (A_right + B_right) / (2.0 * C_right)
+
+        return left_ratio, right_ratio
+
+    def _get_Eyes_ratio_variance(self, frames):
+        ratio_lst = []
         for frame in frames:
             # left eyes position tuple(x, y)
             index_36 = frame[36]
@@ -112,76 +188,105 @@ class FeatureExtractor():
             B_left = dist.euclidean(index_38, index_40)
             C_left = dist.euclidean(index_36, index_39)
             left_ratio = (A_left + B_left) / (2.0 * C_left)
-            left_ratio_lst.append(left_ratio)
+            ratio_lst.append(left_ratio)
 
-            # right eyes position tuple(x, y)
-            index_42 = frame[42]
-            index_43 = frame[43]
-            index_44 = frame[44]
-            index_45 = frame[45]
-            index_46 = frame[46]
-            index_47 = frame[47]
+        mean = sum(ratio_lst) / len(ratio_lst)
+        res = sum((i - mean) ** 2 for i in ratio_lst) / len(ratio_lst)
+        return res
 
-            A_right = dist.euclidean(index_43, index_47)
-            B_right = dist.euclidean(index_44, index_46)
-            C_right = dist.euclidean(index_42, index_45)
-            right_ratio = (A_right + B_right) / (2.0 * C_right)
-            right_ratio_lst.append(right_ratio)
-        #apply histogram
-        left_hist, left_range = np.histogram(left_ratio_lst, 4)
-        left_range_min = left_range[1]
-        left_range_max = left_range[-2]
+    def _get_Eye_Vertical_Length(self, frames): # frames is np array with (n # frame,68,2) shape
+        # take the last frame of the window as data
+        # return the left_ratio and right_ratio
 
-        right_hist, right_range = np.histogram(right_ratio_lst, 4)
-        right_range_min = right_range[1]
-        right_range_max = right_range[-2]
+        len_frames = len(frames)
+        frame = frames[len_frames-1]
+        # left eyes position tuple(x, y)
+        index_19 = frame[19][1]
+        index_6 = frame[6][1]
 
-        return left_range_min, left_range_max, right_range_min, right_range_max
+        index_37 = frame[37][1]
+        index_38 = frame[38][1]
+
+        index_40 = frame[40][1]
+        index_41 = frame[41][1]
+
+        left_face_length = abs(index_19 - index_6)
+        A_left = abs(index_37 - index_41)
+        B_left = abs(index_38 - index_40)
+        left_eye_ratio = ((A_left + B_left)/2)/left_face_length
+
+
+        # right eyes position tuple(x, y)
+        index_24 = frame[24][1]
+        index_10 = frame[10][1]
+
+        index_43 = frame[43][1]
+        index_44 = frame[44][1]
+
+        index_46 = frame[46][1]
+        index_47 = frame[47][1]
+
+        right_face_length = abs(index_24 - index_10)
+        A_left = abs(index_43 - index_47)
+        B_left = abs(index_44 - index_46)
+        right_eye_ratio = ((A_left + B_left)/2)/right_face_length
+
+        return (left_eye_ratio + right_eye_ratio)/2
 
     def extract_features(self, frames, debug=True):  # frames: 68 * n frames(time_domain)
         x = []
         y = []
-        left_HorizontalLength, left_VerticalLength = self._getEyelength(frames, 'left')
-        right_HorizontalLength, right_VerticalLength = self._getEyelength(frames, 'right')
-        x.append(left_VerticalLength)
-        y.append("left_vertical_Eye_Length")
-        x.append(left_HorizontalLength)
-        y.append("left_horizontal_Eye_Length")
-        x.append(right_VerticalLength)
-        y.append("right_vertical_Eye_Length")
-        x.append(right_HorizontalLength)
-        y.append("right_horizontal_Eye_Length")
-        left_x_ratio = self._getHorizontalLineRatio(frames, left_HorizontalLength, 'left')
-        left_y_ratio = self._getVerticalLineRatio(frames, left_VerticalLength, 'left')
-        right_x_ratio = self._getHorizontalLineRatio(frames, right_HorizontalLength, 'right')
-        right_y_ratio = self._getVerticalLineRatio(frames, right_VerticalLength, 'right')
-        x.append(self._getRatioMean(left_x_ratio))
-        y.append('left_vertical_Eye_Ratio_Mean')
-        x.append(self._getRatioMean(left_y_ratio))
-        y.append('left_horizontal_Eye_Ratio_Mean')
-        x.append(self._getRatioMean(right_x_ratio))
-        y.append('right_vertical_Eye_Ratio_Mean')
-        x.append(self._getRatioMean(right_y_ratio))
-        y.append('right_horizontal_Eye_Ratio_Mean')
-        x.append(self._getRatioMedian(left_x_ratio))
-        y.append('left_vertical_Eye_Ratio_Median')
-        x.append(self._getRatioMedian(left_y_ratio))
-        y.append('left_horizontal_Eye_Ratio_Median')
-        x.append(self._getRatioMedian(right_x_ratio))
-        y.append('right_vertical_Eye_Ratio_Median')
-        x.append(self._getRatioMedian(right_y_ratio))
-        y.append('right_horizontal_Eye_Ratio_Median')
+        # left_HorizontalLength, left_VerticalLength = self._getEyelength(frames, 'left')
+        # right_HorizontalLength, right_VerticalLength = self._getEyelength(frames, 'right')
+        # x.append(left_VerticalLength)
+        # y.append("left_vertical_Eye_Length")
+        # x.append(left_HorizontalLength)
+        # y.append("left_horizontal_Eye_Length")
+        # x.append(right_VerticalLength)
+        # y.append("right_vertical_Eye_Length")
+        # x.append(right_HorizontalLength)
+        # y.append("right_horizontal_Eye_Length")
+        # left_x_ratio = self._getHorizontalLineRatio(frames, left_HorizontalLength, 'left')
+        # left_y_ratio = self._getVerticalLineRatio(frames, left_VerticalLength, 'left')
+        # right_x_ratio = self._getHorizontalLineRatio(frames, right_HorizontalLength, 'right')
+        # right_y_ratio = self._getVerticalLineRatio(frames, right_VerticalLength, 'right')
+        # x.append(self._getRatioMean(left_x_ratio))
+        # y.append('left_vertical_Eye_Ratio_Mean')
+        # x.append(self._getRatioMean(left_y_ratio))
+        # y.append('left_horizontal_Eye_Ratio_Mean')
+        # x.append(self._getRatioMean(right_x_ratio))
+        # y.append('right_vertical_Eye_Ratio_Mean')
+        # x.append(self._getRatioMean(right_y_ratio))
+        # y.append('right_horizontal_Eye_Ratio_Mean')
+        # x.append(self._getRatioMedian(left_x_ratio))
+        # y.append('left_vertical_Eye_Ratio_Median')
+        # x.append(self._getRatioMedian(left_y_ratio))
+        # y.append('left_horizontal_Eye_Ratio_Median')
+        # x.append(self._getRatioMedian(right_x_ratio))
+        # y.append('right_vertical_Eye_Ratio_Median')
+        # x.append(self._getRatioMedian(right_y_ratio))
+        # y.append('right_horizontal_Eye_Ratio_Median')
         # x.append(self._getLineRatio(frames, HorizontalLength, VerticalLength))
         # y.append('VerticalToHorizontalRatio')
-        left_range_min, left_range_max, right_range_min, right_range_max= self._getBothEyeRatio(frames)
-        x.append(left_range_min)
-        y.append('left_eye_ratio_min')
-        x.append(right_range_min)
-        y.append('right_eye_ratio_min')
-        x.append(left_range_max)
-        y.append('left_eye_range_max')
-        x.append(right_range_max)
-        y.append('right_eye_range_max')
+        # left_range_min, left_range_max, right_range_min, right_range_max= self._getBothEyeRatio(frames)
+        # x.append(left_range_min)
+        # y.append('left_eye_ratio_min')
+        # x.append(right_range_min)
+        # y.append('right_eye_ratio_min')
+        # x.append(left_range_max)
+        # y.append('left_eye_range_max')
+        # x.append(right_range_max)
+        # y.append('right_eye_range_max')
+        left_ratio, right_ratio = self._getBothEyeRatio(frames)
+        x.append(left_ratio)
+        y.append('left_eye_ratio')
+        x.append(right_ratio)
+        y.append('right_eye_ratio')
+        y_length = self._get_Eye_Vertical_Length(frames)
+        x.append(y_length)
+        y.append('Eyes_Vertical_Ratio')
+        x.append(self._get_Eyes_ratio_variance(frames))
+        y.append('Left_Ratio_Variance')
         # if debug:
         #     print(x)
         #     print(y)

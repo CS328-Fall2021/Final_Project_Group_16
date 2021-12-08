@@ -19,7 +19,7 @@ if not debug:
         sys.exit()
     
 feature_extractor = FeatureExtractor(debug=False)
-cap = cv.VideoCapture(0, cv.CAP_DSHOW)    
+cap = cv.VideoCapture(0)
 
 def ActivityDetected(frame, activity):
     """
