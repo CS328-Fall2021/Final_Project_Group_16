@@ -91,26 +91,26 @@ n = len(y)
 n_classes = len(class_names)
 
 print("\n")
-print("---------------------- Decision Tree -------------------------")
+print("---------------------- Cross Validation & Final Decision Tree -------------------------")
 #		                Train & Evaluate Classifier
 
 cv = model_selection.KFold(n_splits=10, random_state=None, shuffle=True)
 for index, (train_index, test_index) in enumerate(cv.split(X)):
-    tree = DecisionTreeClassifier(criterion="entropy")
+    tree = DecisionTreeClassifier(criterion="entropy", min_samples_leaf=10, max_depth=7)
     #print("Train: ", train_index, "Test: ", test_index)
     X_train, X_test = X[train_index], X[test_index]
     y_train, y_test = y[train_index], y[test_index]
     tree.fit(X_train, y_train)
     y_pre = tree.predict(X_test)
     conf = confusion_matrix(y_test, y_pre)
-#     print('\nFold: {:>2}'.format(index+1))
-#     print('Confusion Matrix:')
-#     print(conf)
+    print('\nFold: {:>2}'.format(index+1))
+    print('Confusion Matrix:')
+    print(conf)
     print('Average Accuracy: ', tree.score(X_test, y_test))
     print('Precision Value: ', precision_score(y_test, y_pre, average='micro'))
     print('Recall Value: ', recall_score(y_test, y_pre, average='micro'))
 
-tree = DecisionTreeClassifier(criterion="entropy")
+tree = DecisionTreeClassifier(criterion="entropy", min_samples_leaf=10, max_depth=7)
 tree.fit(X, y)
 export_graphviz(tree, out_file=os.path.join(output_dir, 'sample.dot'), feature_names=features_names, class_names=class_names)
 with open(os.path.join(output_dir, classifier_filename), 'wb') as f:
