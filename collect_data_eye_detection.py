@@ -45,11 +45,12 @@ try:
             
             labelled_data = []
             for data in raw_data:
-                gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+                gray = cv.cvtColor(data, cv.COLOR_BGR2GRAY)
                 faces = detector(gray)
 
                 if len(faces) == 1:
                     landmarks = predictor(gray, faces[0])
+                    print(landmarks.parts())
                     face_points = []
                     for point in landmarks.parts():
                         face_points.append([point.x, point.y])
