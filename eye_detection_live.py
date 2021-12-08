@@ -21,16 +21,21 @@ if not debug:
 feature_extractor = FeatureExtractor(debug=False)
 cap = cv.VideoCapture(0)
 
+def print_activity(frame, activity_str):
+    cv.putText(frame, activity_str, (50,150), FONT, 3, (255,0,0))
+    return frame
+
+
 def ActivityDetected(frame, activity):
     """
     Notifies the user of the current speaker
     """
-    cv.putText(frame, class_labels[int(activity)], (50,150), FONT, 3, (255,0,0))
-    print("Current activity: {}.".format(class_labels[int(activity)]))
+    print_activity(frame, class_labels[activity])
+    print("Current activity: {}.".format(class_labels[activity]))
     sys.stdout.flush()
     return frame
 
-def predict(last_frame, window):
+def predict(window):
     
     X, feature_names = feature_extractor.extract_features(window)
     X = np.reshape(X,(1,-1))
@@ -38,10 +43,11 @@ def predict(last_frame, window):
         index = classifier.predict(X) 
     else:
         index = random.choice(labels_index)
-    return ActivityDetected(last_frame, index) 
+    return int(index)
 
 
 try:
+    cur_label = 'No label is predicted yet.'
     notready = True
     cur_samples = []
     while True:
@@ -73,8 +79,13 @@ try:
             frame = draw_eye(landmarks, frame, eye_points[1])
 
             if len(cur_samples) >= WINDOW_SIZE:
-                predict(frame,cur_samples)
+                activity_index = predict(cur_samples)
+                cur_label = class_labels[activity_index]
+                frame = ActivityDetected(frame, activity_index) 
                 cur_samples.clear()
+            else:
+                frame = print_activity(frame, cur_label) 
+
 
         cv.imshow("Eye Movement Classification", frame)
 
