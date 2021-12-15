@@ -12,7 +12,7 @@ label = 3
 
 filename="eye-data-{}.csv".format(label)#"eye-data-1.csv"
 
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(0, cv.CAP_DSHOW) #  use(0, cv.CAP_DSHOW) for windows and (0) for mac
 
 raw_data = []
 

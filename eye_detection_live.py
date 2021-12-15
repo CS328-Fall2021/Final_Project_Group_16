@@ -19,7 +19,7 @@ if not debug:
         sys.exit()
     
 feature_extractor = FeatureExtractor(debug=False)
-cap = cv.VideoCapture(0)
+cap = cv.VideoCapture(0, cv.CAP_DSHOW) #  use(0, cv.CAP_DSHOW) for windows and (0) for mac
 
 def print_activity(frame, activity_str):
     cv.putText(frame, activity_str, (50,150), FONT, 3, (255,0,0), thickness=3)
